@@ -138,6 +138,24 @@ def get_article(article_id):
 
         return dict(row)
 
+def get_article_by_title(title):
+    with sqlite3.connect(DATABASE_FILE) as connection:
+        connection.row_factory = sqlite3.Row
+
+        row = connection.execute(
+            """
+            SELECT id, title, category, importance
+            FROM articles
+            WHERE title = ?
+            """,
+            (title,),
+        ).fetchone()
+
+        if row is None:
+            return None
+
+        return dict(row)
+
 def update_article(article_id, title, category, importance):
     with sqlite3.connect(DATABASE_FILE) as connection:
         connection.row_factory = sqlite3.Row

@@ -6,6 +6,7 @@ from database import(
     get_articles,
     initialize_database,
     get_article,
+    get_article_by_title,
     update_article,
     delete_article,
     get_statistics,
@@ -13,8 +14,21 @@ from database import(
     get_analysis,
 )
 from analyzer import analyze_article
+from source_client import (
+    fetch_dev_articles,
+    normalize_dev_articles,
+)
 from datetime import datetime
+import logging
 app = FastAPI()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s - %(message)s",
+)
+
+logger = logging.getLogger(__name__)
+
 batch_status = {
     "status": "idle",
     "started_at": None,
@@ -122,6 +136,7 @@ def statistics():
 
 @app.post("/articles/{article_id}/analyze")
 def analyze_one_article(article_id: int):
+    logger.info("开始分析文章 article_id=%s", article_id)
     article = get_article(article_id)
 
     if article is None:
@@ -133,7 +148,9 @@ def analyze_one_article(article_id: int):
     try:
         analysis = analyze_article(article)
         save_analysis(article_id, analysis)
+        logger.info("分析结果已保存 article_id=%s", article_id)
     except Exception as error:
+        logger.exception("文章分析失败 article_id=%s", article_id)
         raise HTTPException(
             status_code=502,
             detail=f"DeepSeek 分析失败：{error}",
@@ -142,6 +159,51 @@ def analyze_one_article(article_id: int):
     return {
         "article": article,
         "analysis": analysis,
+    }
+
+@app.post("/sources/dev/import")
+def import_dev_articles(
+    tag: str = "ai",
+    limit: int = Query(default=5, ge=1, le=20),
+):
+    raw_articles = fetch_dev_articles(
+        tag=tag,
+        limit=limit,
+    )
+
+    articles = normalize_dev_articles(raw_articles)
+    imported_articles = []
+    skipped_articles = []
+
+    for article in articles:
+        existing_article = get_article_by_title(
+            article["title"]
+        )
+
+        if existing_article is not None:
+            skipped_articles.append(existing_article)
+            continue
+
+        saved_article = create_article(
+            article["title"],
+            article["category"],
+            article["importance"],
+        )
+
+        imported_articles.append(saved_article)
+
+    logger.info(
+        "DEV 文章导入完成 count=%s",
+        len(imported_articles),
+    )
+
+    return {
+        "source": "DEV",
+        "tag": tag,
+        "fetched": len(raw_articles),
+        "imported": len(imported_articles),
+        "skipped": len(skipped_articles),
+        "articles": imported_articles,
     }
 
 @app.post("/analysis/batch")
@@ -153,6 +215,12 @@ def analyze_all_articles(
         )
     ):
     articles = get_articles(limit=limit)
+
+    logger.info(
+        "批量分析开始 total=%s limit=%s",
+        len(articles),
+        limit,
+    )
 
     batch_status["status"] = "running"
     batch_status["started_at"] = datetime.now().isoformat()
@@ -198,6 +266,12 @@ def analyze_all_articles(
 
     batch_status["status"] = "completed"
     batch_status["finished_at"] = datetime.now().isoformat()
+    logger.info(
+        "批量分析完成 total=%s completed=%s failed=%s",
+        batch_status["total"],
+        batch_status["completed"],
+        batch_status["failed"],
+    )
 
     return {
         "total": len(articles),
