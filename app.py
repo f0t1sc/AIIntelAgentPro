@@ -206,6 +206,31 @@ def import_dev_articles(
         "articles": imported_articles,
     }
 
+@app.post("/pipeline/dev")
+def run_dev_pipeline(
+    tag: str = "ai",
+    limit: int = Query(default=5, ge=1, le=20),
+):
+    import_result = import_dev_articles(
+        tag=tag,
+        limit=limit,
+    )
+
+    analysis_result = analyze_all_articles(
+        limit=limit,
+    )
+
+    logger.info(
+        "DEV 工作流完成 tag=%s limit=%s",
+        tag,
+        limit,
+    )
+
+    return {
+        "import": import_result,
+        "analysis": analysis_result,
+    }
+
 @app.post("/analysis/batch")
 def analyze_all_articles(
     limit: int = Query(
