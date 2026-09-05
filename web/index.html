@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>AIIntelAgentPro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            color: #2563eb;
+        }
+
+        button {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f3f4f6;
+        }
+
+        .analyzed {
+            color: green;
+        }
+
+        .unanalyzed {
+            color: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI 资讯分析系统</h1>
+
+    <button onclick="loadArticles()">刷新文章</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>标题</th>
+                <th>分类</th>
+                <th>来源</th>
+                <th>重要程度</th>
+                <th>分析状态</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+
+        <tbody id="article-list"></tbody>
+    </table>
+
+    <script>
+        async function loadArticles() {
+            const response = await fetch("/articles");
+            const articles = await response.json();
+
+            const list = document.getElementById("article-list");
+            list.innerHTML = "";
+
+            for (const article of articles) {
+                const row = document.createElement("tr");
+
+                const status = article.analyzed === 1
+                    ? '<span class="analyzed">已分析</span>'
+                    : '<span class="unanalyzed">未分析</span>';
+
+                row.innerHTML = `
+                    <td>${article.id}</td>
+                    <td>${article.title}</td>
+                    <td>${article.category}</td>
+                    <td>${article.source}</td>
+                    <td>${article.importance}</td>
+                    <td>${status}</td>
+                    <td>
+                        ${
+                            article.analyzed === 1
+                                ? "已完成"
+                                : `<button onclick="analyzeArticle(${article.id})">
+                                        分析
+                                    </button>`
+                        }
+                    </td>
+                `;
+
+                list.appendChild(row);
+            }
+        }
+
+        loadArticles();
+        async function analyzeArticle(articleId) {
+            const response = await fetch(
+                `/articles/${articleId}/analyze`,
+                {
+                    method: "POST",
+                }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.detail || "分析失败");
+                return;
+            }
+
+            alert("分析完成");
+            loadArticles();
+        }
+    </script>
+</body>
+</html>

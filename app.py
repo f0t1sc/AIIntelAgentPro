@@ -20,7 +20,20 @@ from source_client import (
 )
 from datetime import datetime
 import logging
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 app = FastAPI()
+
+WEB_DIR = Path(__file__).parent / "web"
+
+app.mount(
+    "/dashboard",
+    StaticFiles(
+        directory=WEB_DIR,
+        html=True,
+    ),
+    name="dashboard",
+)
 
 logging.basicConfig(
     level=logging.INFO,
