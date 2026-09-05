@@ -47,7 +47,7 @@
 </head>
 <body>
     <h1>AI 资讯分析系统</h1>
-
+    <button onclick="analyzeBatch()">批量分析文章</button>
     <button onclick="loadArticles()">刷新文章</button>
 
     <table>
@@ -91,10 +91,12 @@
                     <td>
                         ${
                             article.analyzed === 1
-                                ? "已完成"
+                                ? `<button onclick="showAnalysis(${article.id})">
+                                       查看分析
+                                   </button>`
                                 : `<button onclick="analyzeArticle(${article.id})">
-                                        分析
-                                    </button>`
+                                       分析
+                                   </button>`
                         }
                     </td>
                 `;
@@ -120,6 +122,48 @@
             }
 
             alert("分析完成");
+            loadArticles();
+        }
+
+        async function showAnalysis(articleId) {
+            const response = await fetch(
+                `/articles/${articleId}/analysis`
+            );
+
+            const analysis = await response.json();
+
+            if (!response.ok) {
+                alert(analysis.detail || "读取分析结果失败");
+                return;
+            }
+
+            alert(
+                `摘要：${analysis.summary}\n` +
+                `分类：${analysis.category}\n` +
+                `重要程度：${analysis.importance}/5\n` +
+                `关键词：${analysis.keywords.join("、")}`
+            );
+        }
+
+        async function analyzeBatch() {
+            const response = await fetch("/analysis/batch?limit=20", {
+                method: "POST"
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.detail || "批量分析失败");
+                return;
+            }
+
+            alert(
+                `批量分析完成\n` +
+                `总数：${result.total}\n` +
+                `成功：${result.completed}\n` +
+                `失败：${result.failed}`
+            );
+
             loadArticles();
         }
     </script>
