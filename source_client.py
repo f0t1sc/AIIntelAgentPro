@@ -38,6 +38,8 @@ def normalize_dev_articles(raw_articles):
 
         user = article.get("user") or {}
         author = user.get("name", "Unknown").strip()
+        published_at = article.get("published_at", "")
+        published_at = published_at[:10] if published_at else None
 
         if not title:
             continue
@@ -46,6 +48,8 @@ def normalize_dev_articles(raw_articles):
             "title": title,
             "category": f"DEV/{author}",
             "importance": 3,
+            "source": f"DEV/{author}",
+            "published_at": published_at,
         })
 
     return normalized_articles

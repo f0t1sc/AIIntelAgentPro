@@ -30,6 +30,28 @@ def initialize_database():
             )
             """
         )
+        columns = {
+            row[1]
+            for row in connection.execute(
+                "PRAGMA table_info(articles)"
+            ).fetchall()
+        }
+
+        if "source" not in columns:
+            connection.execute(
+                """
+                ALTER TABLE articles
+                ADD COLUMN source TEXT NOT NULL DEFAULT 'manual'
+                """
+            )
+
+        if "published_at" not in columns:
+            connection.execute(
+                """
+                ALTER TABLE articles
+                ADD COLUMN published_at TEXT
+                """
+            )
         count = connection.execute(
             "SELECT COUNT(*) FROM articles"
         ).fetchone()[0]
@@ -64,6 +86,8 @@ def get_articles(
                      articles.title, \
                      articles.category, \
                      articles.importance, \
+                     articles.source, \
+                     articles.published_at, \
                      CASE \
                          WHEN article_analysis.article_id IS NULL THEN 0 \
                          ELSE 1 \
@@ -103,14 +127,14 @@ def get_articles(
         rows = connection.execute(sql, params).fetchall()
         return [dict(row) for row in rows]
 
-def create_article(title, category, importance):
+def create_article(title, category, importance,source="manual",published_at=None,):
     with sqlite3.connect(DATABASE_FILE) as connection:
         cursor = connection.execute(
             """
-            INSERT INTO articles (title, category, importance)
-            VALUES (?, ?, ?)
+            INSERT INTO articles (title, category, importance,source,published_at)
+            VALUES (?, ?, ?, ?, ?)
             """,
-            (title, category, importance),
+            (title, category, importance,source,published_at),
         )
 
         return {
@@ -118,6 +142,8 @@ def create_article(title, category, importance):
             "title": title,
             "category": category,
             "importance": importance,
+            "source": source,
+            "published_at": published_at,
         }
 
 def get_article(article_id):
@@ -126,7 +152,7 @@ def get_article(article_id):
 
         row = connection.execute(
             """
-            SELECT id, title, category, importance
+            SELECT id, title, category, importance, source, published_at
             FROM articles
             WHERE id = ?
             """,
@@ -144,7 +170,7 @@ def get_article_by_title(title):
 
         row = connection.execute(
             """
-            SELECT id, title, category, importance
+            SELECT id, title, category, importance, source, published_at
             FROM articles
             WHERE title = ?
             """,

@@ -188,6 +188,8 @@ def import_dev_articles(
             article["title"],
             article["category"],
             article["importance"],
+            article["source"],
+            article["published_at"],
         )
 
         imported_articles.append(saved_article)
