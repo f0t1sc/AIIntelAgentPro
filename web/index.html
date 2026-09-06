@@ -67,7 +67,7 @@
             <option value="false">未分析</option>
         </select>
 
-        <button onclick="loadArticles()">筛选</button>
+        <button onclick="filterArticles()">筛选</button>
     </div>
     <div id="stats">
         正在读取统计数据……
@@ -88,7 +88,17 @@
         <tbody id="article-list"></tbody>
     </table>
 
+    <div>
+        <button onclick="previousPage()">上一页</button>
+        <span id="page-info">第 1 页</span>
+        <button onclick="nextPage()">下一页</button>
+    </div>
+
     <script>
+        let currentOffset = 0;
+        const pageSize = 10;
+        let currentPageCount = 0;
+
         async function loadArticles() {
             const keyword = document.getElementById("keyword").value;
             const category = document.getElementById("category").value;
@@ -108,8 +118,11 @@
                 params.append("analyzed", analyzed);
             }
 
+            params.append("limit", pageSize);
+            params.append("offset", currentOffset);
             const response = await fetch(`/articles?${params.toString()}`);
             const articles = await response.json();
+            currentPageCount = articles.length;
 
             const list = document.getElementById("article-list");
             list.innerHTML = "";
@@ -143,6 +156,8 @@
 
                 list.appendChild(row);
             }
+            document.getElementById("page-info").textContent =
+            `第 ${currentOffset / pageSize + 1} 页`;
         }
 
         loadArticles();
@@ -224,6 +239,29 @@
                         .join("、")}
                 </p>
             `;
+        }
+
+        function previousPage() {
+            if (currentOffset === 0) {
+                return;
+            }
+
+            currentOffset -= pageSize;
+            loadArticles();
+        }
+
+        function nextPage() {
+            if (currentPageCount < pageSize) {
+                return;
+            }
+
+            currentOffset += pageSize;
+            loadArticles();
+        }
+
+        function filterArticles() {
+            currentOffset = 0;
+            loadArticles();
         }
 
         async function importDevArticles() {
