@@ -149,10 +149,74 @@
                 white-space: nowrap;
             }
         }
+        body.dark {
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        body.dark h1 {
+            color: #60a5fa;
+        }
+
+        body.dark #stats,
+        body.dark #health,
+        body.dark table {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        body.dark th {
+            background: #334155;
+            color: #bfdbfe;
+        }
+
+        body.dark td {
+            border-color: #475569;
+        }
+
+        body.dark tr:hover {
+            background: #334155;
+        }
+        body.dark button {
+            background: #3b82f6;
+            color: white;
+        }
+
+        body.dark button:hover {
+            background: #60a5fa;
+            color: #0f172a;
+        }
+
+        body.dark input,
+        body.dark select {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-color: #64748b;
+        }
+
+        body.dark .stat-card {
+            background: #334155;
+        }
+
+        body.dark .stat-card span {
+            color: #cbd5e1;
+        }
+
+        body.dark .stat-card strong {
+            color: #93c5fd;
+        }
+
+        body.dark #health {
+            background: #1e293b;
+            color: #4ade80;
+        }
     </style>
 </head>
 <body>
     <h1>AI 资讯分析系统</h1>
+    <button id="theme-button" onclick="toggleDarkMode()">
+        切换深色模式
+    </button>
     <button onclick="analyzeBatch()">批量分析文章</button>
     <button onclick="loadArticles()">刷新文章</button>
     <button onclick="importDevArticles()">导入 DEV 文章</button>
@@ -453,6 +517,21 @@
             }
         }
 
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark");
+
+            const enabled = document.body.classList.contains("dark");
+            localStorage.setItem("darkMode", enabled ? "on" : "off");
+
+            document.getElementById("theme-button").textContent =
+                enabled ? "切换浅色模式" : "切换深色模式";
+        }
+
+        if (localStorage.getItem("darkMode") === "on") {
+            document.body.classList.add("dark");
+            document.getElementById("theme-button").textContent =
+                "切换浅色模式";
+        }
     </script>
 </body>
 </html>
