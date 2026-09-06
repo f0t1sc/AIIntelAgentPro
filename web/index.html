@@ -50,6 +50,7 @@
     <button onclick="analyzeBatch()">批量分析文章</button>
     <button onclick="loadArticles()">刷新文章</button>
     <button onclick="importDevArticles()">导入 DEV 文章</button>
+    <button onclick="runPipeline()">一键导入并分析</button>
     <div>
         <input id="keyword" placeholder="搜索标题">
 
@@ -245,6 +246,33 @@
                 `获取：${result.fetched} 篇\n` +
                 `新增：${result.imported} 篇\n` +
                 `跳过：${result.skipped} 篇`
+            );
+
+            loadArticles();
+            loadStats();
+        }
+
+        async function runPipeline() {
+            const response = await fetch(
+                "/pipeline/dev?tag=ai&limit=5",
+                {
+                    method: "POST"
+                }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.detail || "工作流执行失败");
+                return;
+            }
+
+            alert(
+                `工作流完成\n` +
+                `导入文章：${result.import.imported} 篇\n` +
+                `跳过文章：${result.import.skipped} 篇\n` +
+                `新分析：${result.analysis.analyzed} 篇\n` +
+                `失败：${result.analysis.failed} 篇`
             );
 
             loadArticles();
