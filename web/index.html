@@ -49,6 +49,7 @@
     <h1>AI 资讯分析系统</h1>
     <button onclick="analyzeBatch()">批量分析文章</button>
     <button onclick="loadArticles()">刷新文章</button>
+    <button onclick="importDevArticles()">导入 DEV 文章</button>
     <div>
         <input id="keyword" placeholder="搜索标题">
 
@@ -222,6 +223,32 @@
                         .join("、")}
                 </p>
             `;
+        }
+
+        async function importDevArticles() {
+            const response = await fetch(
+                "/sources/dev/import?tag=ai&limit=5",
+                {
+                    method: "POST"
+                }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.detail || "导入失败");
+                return;
+            }
+
+            alert(
+                `DEV 文章导入完成\n` +
+                `获取：${result.fetched} 篇\n` +
+                `新增：${result.imported} 篇\n` +
+                `跳过：${result.skipped} 篇`
+            );
+
+            loadArticles();
+            loadStats();
         }
     </script>
 </body>
