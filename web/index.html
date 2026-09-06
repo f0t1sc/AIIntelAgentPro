@@ -72,6 +72,9 @@
     <div id="stats">
         正在读取统计数据……
     </div>
+    <div id="health">
+        正在检查服务状态……
+    </div>
     <table>
         <thead>
             <tr>
@@ -162,6 +165,7 @@
 
         loadArticles();
         loadStats();
+        loadHealth();
         async function analyzeArticle(articleId) {
             const response = await fetch(
                 `/articles/${articleId}/analyze`,
@@ -180,6 +184,7 @@
             alert("分析完成");
             loadArticles();
             loadStats();
+            loadHealth();
         }
 
         async function showAnalysis(articleId) {
@@ -224,6 +229,7 @@
 
             loadArticles();
             loadStats();
+            loadHealth();
         }
 
         async function loadStats() {
@@ -288,6 +294,7 @@
 
             loadArticles();
             loadStats();
+            loadHealth();
         }
 
         async function runPipeline() {
@@ -315,7 +322,24 @@
 
             loadArticles();
             loadStats();
+            loadHealth();
         }
+
+        async function loadHealth() {
+            const response = await fetch("/health");
+            const result = await response.json();
+
+            const health = document.getElementById("health");
+
+            if (response.ok && result.status === "ok") {
+                health.textContent = "服务状态：正常";
+                health.style.color = "green";
+            } else {
+                health.textContent = "服务状态：异常";
+                health.style.color = "red";
+            }
+        }
+
     </script>
 </body>
 </html>
