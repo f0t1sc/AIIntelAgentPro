@@ -122,6 +122,33 @@
             font-size: 28px;
             color: #2563eb;
         }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 20px 12px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            #stats {
+                flex-direction: column;
+            }
+
+            input,
+            select,
+            button {
+                width: 100%;
+                margin: 6px 0;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
     </style>
 </head>
 <body>
