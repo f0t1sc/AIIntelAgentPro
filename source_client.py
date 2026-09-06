@@ -46,7 +46,7 @@ def normalize_dev_articles(raw_articles):
 
         normalized_articles.append({
             "title": title,
-            "category": f"DEV/{author}",
+            "category": "DEV/AI",
             "importance": 3,
             "source": f"DEV/{author}",
             "published_at": published_at,

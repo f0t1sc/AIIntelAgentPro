@@ -52,6 +52,23 @@ def initialize_database():
                 ADD COLUMN published_at TEXT
                 """
             )
+
+        connection.execute(
+            """
+            UPDATE articles
+            SET source = category
+            WHERE source = 'manual'
+              AND category LIKE 'DEV/%'
+            """
+        )
+
+        connection.execute(
+            """
+            UPDATE articles
+            SET category = 'DEV/AI'
+            WHERE category LIKE 'DEV/%'
+            """
+        )
         count = connection.execute(
             "SELECT COUNT(*) FROM articles"
         ).fetchone()[0]
