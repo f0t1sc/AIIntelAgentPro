@@ -21,5 +21,6 @@ def test_normalize_dev_articles():
 
     assert len(result) == 1
     assert result[0]["title"] == "AI Agents in Business"
-    assert result[0]["category"] == "DEV/Alice"
+    assert result[0]["category"] == "DEV/AI"
+    assert result[0]["source"] == "DEV/Alice"
     assert result[0]["importance"] == 3
