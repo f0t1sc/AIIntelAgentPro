@@ -49,7 +49,27 @@
     <h1>AI 资讯分析系统</h1>
     <button onclick="analyzeBatch()">批量分析文章</button>
     <button onclick="loadArticles()">刷新文章</button>
+    <div>
+        <input id="keyword" placeholder="搜索标题">
 
+        <select id="category">
+            <option value="">全部分类</option>
+            <option value="Agent应用">Agent应用</option>
+            <option value="技术优化">技术优化</option>
+            <option value="DEV/AI">DEV/AI</option>
+        </select>
+
+        <select id="analyzed">
+            <option value="">全部状态</option>
+            <option value="true">已分析</option>
+            <option value="false">未分析</option>
+        </select>
+
+        <button onclick="loadArticles()">筛选</button>
+    </div>
+    <div id="stats">
+        正在读取统计数据……
+    </div>
     <table>
         <thead>
             <tr>
@@ -68,7 +88,25 @@
 
     <script>
         async function loadArticles() {
-            const response = await fetch("/articles");
+            const keyword = document.getElementById("keyword").value;
+            const category = document.getElementById("category").value;
+            const analyzed = document.getElementById("analyzed").value;
+
+            const params = new URLSearchParams();
+
+            if (keyword) {
+                params.append("keyword", keyword);
+            }
+
+            if (category) {
+                params.append("category", category);
+            }
+
+            if (analyzed) {
+                params.append("analyzed", analyzed);
+            }
+
+            const response = await fetch(`/articles?${params.toString()}`);
             const articles = await response.json();
 
             const list = document.getElementById("article-list");
@@ -106,6 +144,7 @@
         }
 
         loadArticles();
+        loadStats();
         async function analyzeArticle(articleId) {
             const response = await fetch(
                 `/articles/${articleId}/analyze`,
@@ -123,6 +162,7 @@
 
             alert("分析完成");
             loadArticles();
+            loadStats();
         }
 
         async function showAnalysis(articleId) {
@@ -160,11 +200,28 @@
             alert(
                 `批量分析完成\n` +
                 `总数：${result.total}\n` +
-                `成功：${result.completed}\n` +
+                `新分析：${result.analyzed}\n` +
+                `已跳过：${result.skipped}\n` +
                 `失败：${result.failed}`
             );
 
             loadArticles();
+            loadStats();
+        }
+
+        async function loadStats() {
+            const response = await fetch("/stats");
+            const stats = await response.json();
+
+            document.getElementById("stats").innerHTML = `
+                <p>文章总数：${stats.total}</p>
+                <p>平均重要程度：${stats.average_importance}</p>
+                <p>分类统计：
+                    ${stats.categories
+                        .map(item => `${item.category}（${item.count}篇）`)
+                        .join("、")}
+                </p>
+            `;
         }
     </script>
 </body>
