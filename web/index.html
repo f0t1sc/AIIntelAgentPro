@@ -4,44 +4,123 @@
     <meta charset="UTF-8">
     <title>AIIntelAgentPro</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 0 20px;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            background: #f1f5f9;
+            color: #1e293b;
         }
 
         h1 {
+            margin-bottom: 24px;
             color: #2563eb;
+            font-size: 36px;
         }
 
         button {
-            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            margin: 4px;
+            background: #2563eb;
+            color: white;
+            font-size: 14px;
             cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        input,
+        select {
+            margin-top: 18px;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+        }
+
+        #stats,
+        #health {
+            margin-top: 20px;
+            padding: 18px 22px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+        }
+
+        #health {
+            color: #16a34a;
+            font-weight: bold;
         }
 
         table {
             width: 100%;
+            margin-top: 24px;
             border-collapse: collapse;
-            margin-top: 20px;
+            overflow: hidden;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
         }
 
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
+        th,
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e2e8f0;
             text-align: left;
         }
 
         th {
-            background-color: #f3f4f6;
+            background: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        tr:hover {
+            background: #f8fafc;
         }
 
         .analyzed {
-            color: green;
+            color: #16a34a;
+            font-weight: bold;
         }
 
         .unanalyzed {
             color: #dc2626;
+            font-weight: bold;
+        }
+
+        #stats {
+            display: flex;
+            gap: 16px;
+        }
+
+        .stat-card {
+            flex: 1;
+            padding: 18px;
+            border-radius: 10px;
+            background: #eff6ff;
+        }
+
+        .stat-card span {
+            display: block;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .stat-card strong {
+            font-size: 28px;
+            color: #2563eb;
         }
     </style>
 </head>
@@ -237,13 +316,20 @@
             const stats = await response.json();
 
             document.getElementById("stats").innerHTML = `
-                <p>文章总数：${stats.total}</p>
-                <p>平均重要程度：${stats.average_importance}</p>
-                <p>分类统计：
-                    ${stats.categories
-                        .map(item => `${item.category}（${item.count}篇）`)
-                        .join("、")}
-                </p>
+                <div class="stat-card">
+                    <span>文章总数</span>
+                    <strong>${stats.total}</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>平均重要程度</span>
+                    <strong>${stats.average_importance}</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>分类数量</span>
+                    <strong>${stats.categories.length}</strong>
+                </div>
             `;
         }
 
